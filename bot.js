@@ -44,8 +44,35 @@ client.on('interactionCreate', async (interaction) => {
         const guild = interaction.guild;
         const user = interaction.user;
 
+        // Fetch all guild channels and filter to those belonging to this user
+        const allChannels = await guild.channels.fetch();
+        const userTicketPrefix = `ticket-${user.username}-`;
+        const userTicketChannels = allChannels.filter(
+          (ch) => ch && ch.name.startsWith(userTicketPrefix)
+        );
+
+        // Block if the user already has an open ticket (any matching channel still exists)
+        if (userTicketChannels.size > 0) {
+          const openTicket = userTicketChannels.first();
+          return await interaction.reply({
+            content: `You already have an open ticket: ${openTicket}. Please wait for it to be resolved before opening a new one.`,
+            ephemeral: true,
+          });
+        }
+
+        // Determine the next sequential ticket number by finding the highest
+        // number used across all channels with this user's prefix (open or closed).
+        // guild.channels.fetch() was already called above, so the cache is warm.
+        const allUserChannels = allChannels.filter(
+          (ch) => ch && ch.name.startsWith(userTicketPrefix)
+        );
+        const existingNumbers = allUserChannels
+          .map((ch) => parseInt(ch.name.replace(userTicketPrefix, ''), 10))
+          .filter((n) => !isNaN(n));
+        const ticketNumber = existingNumbers.length > 0 ? Math.max(...existingNumbers) + 1 : 1;
+
         const ticketChannel = await guild.channels.create({
-          name: `ticket-${user.username}-${Date.now().toString().slice(-6)}`,
+          name: `${userTicketPrefix}${ticketNumber}`,
           type: ChannelType.GuildText,
           permissionOverwrites: [
             {
