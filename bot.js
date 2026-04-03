@@ -13,7 +13,7 @@ const TOKEN = process.env.DISCORD_TOKEN;
 const ADMIN_ROLE_ID = process.env.ADMIN_ROLE_ID;
 
 client.once('ready', () => {
-  console.log(`✅ Bot logged in as ${client.user.tag}`);
+  console.log(`Bot logged in as ${client.user.tag}`);
 });
 
 client.on('interactionCreate', async (interaction) => {
@@ -65,15 +65,9 @@ client.on('interactionCreate', async (interaction) => {
 
         const embed = new EmbedBuilder()
           .setColor(0x2f3136)
-          .setTitle('📋 Source Code Access Ticket')
           .addFields(
-            { name: 'User', value: `${user.tag}`, inline: true },
-            { name: 'User ID', value: `${user.id}`, inline: true },
-            { name: 'Payment Method', value: purchaseMethod, inline: false },
-            { name: 'Status', value: '🟡 Pending', inline: true },
-            { name: 'Created', value: `<t:${Math.floor(Date.now() / 1000)}:F>`, inline: true }
-          )
-          .setFooter({ text: 'Admins only can see this ticket' });
+            { name: 'Buying with', value: purchaseMethod, inline: false }
+          );
 
         const closeButton = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
@@ -85,7 +79,7 @@ client.on('interactionCreate', async (interaction) => {
         await ticketChannel.send({ embeds: [embed], components: [closeButton] });
 
         await interaction.reply({
-          content: `✅ Ticket created! Check ${ticketChannel}`,
+          content: `Ticket created! Check ${ticketChannel}`,
           ephemeral: true,
         });
       }
@@ -98,13 +92,13 @@ client.on('interactionCreate', async (interaction) => {
 
         if (!hasAdminRole && interaction.user.id !== interaction.guild.ownerId) {
           return await interaction.reply({
-            content: '❌ Only admins can close tickets',
+            content: 'Only admins can close tickets.',
             ephemeral: true,
           });
         }
 
         await interaction.reply({
-          content: '🔒 Closing ticket in 5 seconds...',
+          content: 'Closing ticket in 5 seconds...',
           ephemeral: true,
         });
 
@@ -120,16 +114,15 @@ client.on('interactionCreate', async (interaction) => {
 
         if (!isOwner) {
           return await interaction.reply({
-            content: '❌ Only server owner can use this command',
+            content: 'Only the server owner can use this command.',
             ephemeral: true,
           });
         }
 
         const embed = new EmbedBuilder()
           .setColor(0x5865f2)
-          .setTitle('🎫 Source Code Access')
-          .setDescription('Click the button below to open a ticket and request source code access.')
-          .setFooter({ text: 'Admin support will review your request' });
+          .setTitle('Source Code Access')
+          .setDescription('Click the button below to open a ticket and request source code access.');
 
         const button = new ActionRowBuilder().addComponents(
           new ButtonBuilder()
@@ -141,7 +134,7 @@ client.on('interactionCreate', async (interaction) => {
         await interaction.channel.send({ embeds: [embed], components: [button] });
 
         await interaction.reply({
-          content: '✅ Ticket system setup complete!',
+          content: 'Ticket system setup complete.',
           ephemeral: true,
         });
       }
@@ -150,12 +143,12 @@ client.on('interactionCreate', async (interaction) => {
     console.error('Error handling interaction:', error);
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({
-        content: '❌ An error occurred',
+        content: 'An error occurred.',
         ephemeral: true,
       });
     } else {
       await interaction.reply({
-        content: '❌ An error occurred',
+        content: 'An error occurred.',
         ephemeral: true,
       });
     }
@@ -171,11 +164,11 @@ client.on('ready', async () => {
       name: 'setup',
       description: 'Setup the ticket system (Owner only)',
     });
-    console.log('✅ Slash command registered');
+    console.log('Slash command registered');
   } catch (error) {
     console.error('Error registering command:', error);
   }
 });
 
 client.login(TOKEN);
-console.log('🚀 Discord bot is starting...');
+console.log('Discord bot is starting...');
