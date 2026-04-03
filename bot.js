@@ -69,14 +69,18 @@ client.on('interactionCreate', async (interaction) => {
             { name: 'Buying with', value: purchaseMethod, inline: false }
           );
 
-        const closeButton = new ActionRowBuilder().addComponents(
+        const ticketButtons = new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('claim_ticket')
+            .setLabel('Claim Ticket')
+            .setStyle(ButtonStyle.Success),
           new ButtonBuilder()
             .setCustomId('close_ticket')
             .setLabel('Close Ticket')
             .setStyle(ButtonStyle.Danger)
         );
 
-        await ticketChannel.send({ embeds: [embed], components: [closeButton] });
+        await ticketChannel.send({ embeds: [embed], components: [ticketButtons] });
 
         await interaction.reply({
           content: `Ticket created! Check ${ticketChannel}`,
@@ -86,11 +90,27 @@ client.on('interactionCreate', async (interaction) => {
     }
 
     if (interaction.isButton()) {
+      if (interaction.customId === 'claim_ticket') {
+        const member = interaction.member;
+        const hasAdminRole = member.roles.cache.has(ADMIN_ROLE_ID);
+
+        if (!hasAdminRole) {
+          return await interaction.reply({
+            content: 'Only admins can claim tickets.',
+            ephemeral: true,
+          });
+        }
+
+        await interaction.reply({
+          content: `Claimed by ${interaction.user}`,
+        });
+      }
+
       if (interaction.customId === 'close_ticket') {
         const member = interaction.member;
         const hasAdminRole = member.roles.cache.has(ADMIN_ROLE_ID);
 
-        if (!hasAdminRole && interaction.user.id !== interaction.guild.ownerId) {
+        if (!hasAdminRole) {
           return await interaction.reply({
             content: 'Only admins can close tickets.',
             ephemeral: true,
